@@ -8,6 +8,7 @@ class NotificationHelper {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin(); //
 
   initializeNotification() async {
+    // Schedule Notification based on user time
     tz.initializeTimeZones();
 
     // FOR IOS , at the initialization , we won't ask for permission
@@ -30,12 +31,13 @@ class NotificationHelper {
   }
 
   // FOR OLDER IOS VERSIONS
+  // Pending Intent Basically for IOS Notification
   Future onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) async {
     // display a dialog with the notification details, tap ok to go to another page
     Get.dialog(const Text('Welcome To Flutter'));
   }
 
-  // WHEN CLIKING ON THE NOTIFICATION
+  // WHEN Clicking ON THE NOTIFICATION FOR ANDROID
   Future selectNotification(String? payLoad) async {
     if(payLoad != null){
       print('Notification Payload $payLoad');
