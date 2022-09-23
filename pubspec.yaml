@@ -41,6 +41,7 @@ dependencies:
   timezone: ^0.9.0
   intl: ^0.17.0
   google_fonts: ^3.0.1
+  date_picker_timeline:
 
 dev_dependencies:
   flutter_test:

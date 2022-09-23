@@ -1,17 +1,21 @@
 
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+import 'package:notes_app/ui/add_task_page.dart';
 
 import '../misc/app_colors.dart';
 
 class MyButton extends StatelessWidget {
   String label;
-  final Function onTap;
-  MyButton({Key? key,required this.label,required this.onTap}) : super(key: key);
+  //final Function() onTap;
+  MyButton({Key? key,required this.label}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTap,
+      onTap: (){
+        Get.to(() => const AddTaskPage());
+      },
       child: Container(
         width: 120,
         height: 50,
