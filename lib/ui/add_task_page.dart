@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/misc/app_colors.dart';
 import 'package:notes_app/ui/theme.dart';
 import 'package:notes_app/widgets/my_input_field.dart';
+
+import '../widgets/my_button.dart';
 
 class AddTaskPage extends StatefulWidget {
   const AddTaskPage({Key? key}) : super(key: key);
@@ -13,6 +16,8 @@ class AddTaskPage extends StatefulWidget {
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
+   final TextEditingController _titleController = TextEditingController();
+   final TextEditingController _noteController = TextEditingController();
    DateTime _selectedDate = DateTime.now();
    String startTime = "9:30 PM";
    String endTime = DateFormat("HH:mm a").format(DateTime.now());
@@ -20,6 +25,14 @@ class _AddTaskPageState extends State<AddTaskPage> {
    List<int> list = [
      5,10,15,20
    ];
+
+   String selectedRepeat  = 'None';
+   List<String> repeatList  = [
+   'None','Daily',"Weekly",'Monthly'
+   ];
+
+   int selectedIndex = 1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +71,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
               MyInputField(text: 'Remind', hint: '$selectedRemind minutes early',
                 widget: DropdownButton(
                   icon: const Icon(Icons.arrow_drop_down_outlined,color: Colors.grey,),
-                  iconSize: 20,
+                  iconSize: 30,
                   elevation: 4,
                   style: subTitleStyle,
                   underline: Container(height: 0,),
@@ -73,7 +86,66 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         child: Text(value.toString())
                     );
                   }).toList(),
-                ),)
+                ),),
+              MyInputField(text: 'Repeat', hint: selectedRepeat, widget: DropdownButton(
+                icon: const Icon(Icons.arrow_drop_down_outlined,color: Colors.grey,),
+                iconSize: 30,
+                underline: Container(height: 0,),
+                style: subTitleStyle,
+                onChanged: (String? value){
+                  setState(() {
+                    selectedRepeat = value!;
+                  });
+                },
+                items: repeatList.map<DropdownMenuItem<String>>((String value){
+                   return DropdownMenuItem(
+                     value: value,
+                     child: Text(value),
+                   );
+                }).toList(),
+              ),),
+              const SizedBox(height: 10,),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                         Text('Color',style: titleStyle,),
+                         Padding(
+                           padding: const EdgeInsets.only(top: 10),
+                           child: Wrap(
+                            children: List<Widget>.generate(3, (index){
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      selectedIndex = index;
+                                    });
+                                  },
+                                  child: CircleAvatar(
+                                    radius: 14,
+                                    backgroundColor: index == 0 ? AppColors.primaryColor : index == 1 ? AppColors.pinkColor : AppColors.yellowColor ,
+                                    child: selectedIndex == index ? const Icon(Icons.done,color: Colors.white,size: 14,) : Container(),
+                                  ),
+                                ),
+                              );
+                            }),
+                        ),
+                         )
+                      ],
+                    ),
+                    GestureDetector(
+                        onTap: (){
+                          _validateForm();
+                        },
+                        child: MyButton(label: 'Create Task'))
+                  ],
+                ),
+              )
             ],
           ),
         ),
@@ -133,7 +205,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
        });
      }
   }
-
   _showTimePicker() {
     return  showTimePicker(
         initialEntryMode: TimePickerEntryMode.input,
@@ -141,5 +212,19 @@ class _AddTaskPageState extends State<AddTaskPage> {
         initialTime:  TimeOfDay(
             hour: int.parse(startTime.split(':')[0]),
             minute: int.parse(endTime.split(':')[1].split(' ')[0])));
+  }
+  void _validateForm(){
+    if(_titleController.text.isNotEmpty &&  _noteController.text.isNotEmpty){
+      // ADD TO DATABASE
+      Get.back();
+    } else if (_titleController.text.isEmpty || _noteController.text.isEmpty){
+      Get.snackbar(
+          'Required',
+          'All Fields are required !',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: AppColors.pinkColor,
+          icon: const Icon(Icons.warning,color: Colors.red,));
+    }
   }
 }

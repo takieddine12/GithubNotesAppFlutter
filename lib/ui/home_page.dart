@@ -87,7 +87,11 @@ class _HomePageState extends State<HomePage> {
              Text('Today',style: headingStyle,)
            ],
          ),
-         MyButton(label: '+ Add Task')
+         GestureDetector(
+             onTap: (){
+               Get.to(() => const AddTaskPage());
+             },
+             child: MyButton(label: '+ Add Task'))
        ],
      );
    }
