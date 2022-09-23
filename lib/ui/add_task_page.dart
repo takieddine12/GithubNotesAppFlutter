@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/ui/theme.dart';
 import 'package:notes_app/widgets/my_input_field.dart';
@@ -15,7 +16,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
    DateTime _selectedDate = DateTime.now();
    String startTime = "9:30 PM";
    String endTime = DateFormat("HH:mm a").format(DateTime.now());
-
+   int selectedRemind = 5;
+   List<int> list = [
+     5,10,15,20
+   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,18 +43,37 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   Expanded(
                     child: MyInputField(text: 'Start Time', hint: startTime,
                       widget: IconButton(onPressed: (){
-                        _getDateFromUser();
+                        _getTimeFromUser(true);
                       },icon: const Icon(Icons.access_time),),),
                   ),
                   const SizedBox(width: 10,),
                   Expanded(
                     child: MyInputField(text: 'End Time', hint: endTime,
                       widget: IconButton(onPressed: (){
-                        _getDateFromUser();
+                        _getTimeFromUser(false);
                       },icon: const Icon(Icons.access_time),),),
                   ),
                 ],
-              )
+              ),
+              MyInputField(text: 'Remind', hint: '$selectedRemind minutes early',
+                widget: DropdownButton(
+                  icon: const Icon(Icons.arrow_drop_down_outlined,color: Colors.grey,),
+                  iconSize: 20,
+                  elevation: 4,
+                  style: subTitleStyle,
+                  underline: Container(height: 0,),
+                  onChanged: (String? value) {
+                    setState(() {
+                      selectedRemind = int.parse(value!);
+                    });
+                  },
+                  items: list.map<DropdownMenuItem<String>>((int value){
+                    return DropdownMenuItem<String>(
+                        value: value.toString(),
+                        child: Text(value.toString())
+                    );
+                  }).toList(),
+                ),)
             ],
           ),
         ),
@@ -94,5 +117,29 @@ class _AddTaskPageState extends State<AddTaskPage> {
         _selectedDate = _pickerDate;
       });
     }
+  }
+  _getTimeFromUser(bool isStartTime) async {
+     var pickedTime =  await _showTimePicker();
+     String _formattedTime = pickedTime.format(context);
+     if(pickedTime == null){
+         print("Cannot get time");
+     } else if (isStartTime == true){
+        setState(() {
+          startTime = _formattedTime;
+        });
+     } else if (isStartTime == false){
+       setState(() {
+         endTime = _formattedTime;
+       });
+     }
+  }
+
+  _showTimePicker() {
+    return  showTimePicker(
+        initialEntryMode: TimePickerEntryMode.input,
+        context: context,
+        initialTime:  TimeOfDay(
+            hour: int.parse(startTime.split(':')[0]),
+            minute: int.parse(endTime.split(':')[1].split(' ')[0])));
   }
 }
