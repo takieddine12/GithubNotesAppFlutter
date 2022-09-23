@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/controllers/task_controller.dart';
 import 'package:notes_app/misc/app_colors.dart';
+import 'package:notes_app/models/task_model.dart';
 import 'package:notes_app/ui/theme.dart';
 import 'package:notes_app/widgets/my_input_field.dart';
 
@@ -16,6 +18,7 @@ class AddTaskPage extends StatefulWidget {
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
+   final TaskController _taskController = Get.put(TaskController());
    final TextEditingController _titleController = TextEditingController();
    final TextEditingController _noteController = TextEditingController();
    DateTime _selectedDate = DateTime.now();
@@ -31,7 +34,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
    'None','Daily',"Weekly",'Monthly'
    ];
 
-   int selectedIndex = 1;
+   int selectedColor = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +48,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Add Task',style: headingStyle,),
-              MyInputField(text: 'Title', hint: 'Enter Title Here'),
-              MyInputField(text: 'Note', hint: 'Enter Note Here'),
+              MyInputField(text: 'Title', hint: 'Enter Title Here',textEditingController: _titleController,),
+              MyInputField(text: 'Note', hint: 'Enter Note Here',textEditingController: _noteController,),
               MyInputField(text: 'Date', hint: DateFormat.yMd().format(_selectedDate),
               widget: IconButton(onPressed: (){
                 _getDateFromUser();
@@ -123,13 +126,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                 child: GestureDetector(
                                   onTap: (){
                                     setState(() {
-                                      selectedIndex = index;
+                                      selectedColor = index;
                                     });
                                   },
                                   child: CircleAvatar(
                                     radius: 14,
                                     backgroundColor: index == 0 ? AppColors.primaryColor : index == 1 ? AppColors.pinkColor : AppColors.yellowColor ,
-                                    child: selectedIndex == index ? const Icon(Icons.done,color: Colors.white,size: 14,) : Container(),
+                                    child: selectedColor == index ? const Icon(Icons.done,color: Colors.white,size: 14,) : Container(),
                                   ),
                                 ),
                               );
@@ -213,9 +216,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
             hour: int.parse(startTime.split(':')[0]),
             minute: int.parse(endTime.split(':')[1].split(' ')[0])));
   }
-  void _validateForm(){
+  _validateForm(){
     if(_titleController.text.isNotEmpty &&  _noteController.text.isNotEmpty){
-      // ADD TO DATABASE
+      _addDataToDB();
       Get.back();
     } else if (_titleController.text.isEmpty || _noteController.text.isEmpty){
       Get.snackbar(
@@ -227,4 +230,18 @@ class _AddTaskPageState extends State<AddTaskPage> {
           icon: const Icon(Icons.warning,color: Colors.red,));
     }
   }
+   _addDataToDB() async {
+     int result = await _taskController.insertTask(TaskModel(
+       title: _titleController.text,
+       note: _noteController.text,
+       isCompleted: 0,
+       date:  DateFormat.yMd().format(_selectedDate),
+       startTime: startTime,
+       endTime: endTime,
+       color: selectedColor,
+       remind: selectedRemind,
+       repeat: selectedRepeat
+     ));
+     print("result is $result");
+   }
 }
