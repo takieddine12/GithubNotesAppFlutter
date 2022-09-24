@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/controllers/task_controller.dart';
 import 'package:notes_app/misc/app_colors.dart';
 import 'package:notes_app/services/notification_services.dart';
 import 'package:notes_app/services/theme_service.dart';
@@ -23,6 +24,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
    DateTime _dateTime = DateTime.now();
   late NotificationHelper notificationHelper;
+  final TaskController _taskController = Get.put(TaskController());
   @override
   void initState() {
     super.initState();
@@ -40,7 +42,8 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             _dateBar(),
-            _taskBar()
+            _taskBar(),
+            _showTasks(),
           ],
         ),
       ),
@@ -89,8 +92,9 @@ class _HomePageState extends State<HomePage> {
            ],
          ),
          GestureDetector(
-             onTap: (){
+             onTap: () async {
                Get.to(() => const AddTaskPage());
+               await _taskController.getTasks();
              },
              child: MyButton(label: '+ Add Task'))
        ],
@@ -130,6 +134,37 @@ class _HomePageState extends State<HomePage> {
            });
          },
        ),
+     );
+   }
+   _showTasks(){
+     return Expanded(
+       child: Obx((){
+         return ListView.builder(
+           itemCount: _taskController.taskList.length,
+           itemBuilder: (context,index){
+             return GestureDetector(
+               onTap: () async {
+                 int result = await _taskController.deleteTask(_taskController.taskList[index]);
+                 if(result == 1){
+                   _taskController.getTasks();
+                 }
+
+               },
+               child: Container(
+                 width: 300,
+                 height: 30,
+                 color: Colors.red,
+                 margin: const EdgeInsets.only(bottom: 10),
+                 child: Column(
+                   children: [
+                     Text(_taskController.taskList[index].title!)
+                   ],
+                 ),
+               ),
+             );
+           },
+         );
+       }),
      );
    }
 

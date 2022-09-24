@@ -32,5 +32,13 @@ class DbHelper {
   static Future<int> insertTask(TaskModel taskModel) async {
     return _db!.insert(_tableName, taskModel.toJson());
   }
+
+  static Future<List<Map<String,dynamic>>> query() async {
+    return await _db!.query(_tableName);
+  }
+
+  static Future<int> delete(TaskModel taskModel) async {
+    return await _db!.delete(_tableName,where: "id=?" , whereArgs: [taskModel.id]);
+  }
 }
 
