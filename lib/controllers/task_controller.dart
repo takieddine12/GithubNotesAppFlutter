@@ -10,12 +10,6 @@ class TaskController extends GetxController {
    RxList<TaskModel> taskList =  <TaskModel>[].obs;
 
 
-   @override
-   void onReady(){
-     super.onReady();
-     getTasks();
-   }
-
   Future<int> insertTask(TaskModel taskModel) async {
     return await DbHelper.insertTask(taskModel);
   }

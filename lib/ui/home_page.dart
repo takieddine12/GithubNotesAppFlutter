@@ -1,5 +1,6 @@
 
 import 'package:date_picker_timeline/date_picker_widget.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -7,10 +8,12 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/controllers/task_controller.dart';
 import 'package:notes_app/misc/app_colors.dart';
+import 'package:notes_app/models/task_model.dart';
 import 'package:notes_app/services/notification_services.dart';
 import 'package:notes_app/services/theme_service.dart';
 import 'package:notes_app/ui/add_task_page.dart';
 import 'package:notes_app/ui/theme.dart';
+import 'package:notes_app/widgets/task_tile.dart';
 
 import '../widgets/my_button.dart';
 
@@ -43,6 +46,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             _dateBar(),
             _taskBar(),
+            const SizedBox(height: 15,),
             _showTasks(),
           ],
         ),
@@ -93,8 +97,8 @@ class _HomePageState extends State<HomePage> {
          ),
          GestureDetector(
              onTap: () async {
-               Get.to(() => const AddTaskPage());
-               await _taskController.getTasks();
+               await Get.to(() => const AddTaskPage());
+               _taskController.getTasks();
              },
              child: MyButton(label: '+ Add Task'))
        ],
@@ -137,38 +141,84 @@ class _HomePageState extends State<HomePage> {
      );
    }
    _showTasks(){
+     _taskController.getTasks();
      return Expanded(
        child: Obx((){
          return ListView.builder(
            itemCount: _taskController.taskList.length,
            itemBuilder: (context,index){
-             return GestureDetector(
-               onTap: () async {
-                 int result = await _taskController.deleteTask(_taskController.taskList[index]);
-                 if(result == 1){
-                   _taskController.getTasks();
-                 }
-
-               },
-               child: Container(
-                 width: 300,
-                 height: 30,
-                 color: Colors.red,
-                 margin: const EdgeInsets.only(bottom: 10),
-                 child: Column(
-                   children: [
-                     Text(_taskController.taskList[index].title!)
-                   ],
-                 ),
-               ),
+             return AnimationConfiguration.staggeredList(
+                 position: index,
+                 child: SlideAnimation(
+                   child: FadeInAnimation(
+                     child: Wrap(
+                       children: [
+                          GestureDetector(
+                            onTap: (){
+                              _showBottomSheet(context,_taskController.taskList[index]);
+                            },
+                            child: TaskTile(_taskController.taskList[index]) ,
+                          )
+                       ],
+                     ),
+                   ),
+                 )
              );
            },
          );
        }),
      );
    }
+   _showBottomSheet(BuildContext context , TaskModel taskModel){
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.only(top: 4),
+        height: taskModel.isCompleted == 1 ?
+        MediaQuery.of(context).size.height * 0.24 :
+        MediaQuery.of(context).size.height * 0.32,
+        color: Get.isDarkMode ? AppColors.darkGreyColor : Colors.white,
+        child: Column(
+          children: [
+            Container(
+              height: 6,
+              width: 120,
+              decoration:  BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Get.isDarkMode ? Colors.grey[400] : Colors.grey[200]
+              ),
+
+            ),
+            taskModel.isCompleted == 1
+                ? Container()
+                : _showBottomSheetButton('Task Completed', onTap : (){}),
+
+          ],
+        ),
+      )
+    );
+   }
+   _showBottomSheetButton({required String label , required Function onTapped , required Color clr , bool isClosed = false}){
+       return Padding(
+         padding: const EdgeInsets.only(left: 30,right: 30),
+         child: GestureDetector(
+           onTap: onTapped(),
+           child: Container(
+             decoration: BoxDecoration(
+               borderRadius: BorderRadius.circular(20)
+             ),
+             child: Text(label,style: titleStyle,),
+           ),
+         ),
+       );
+   }
 
    void onTap(){
+     print("Tapped");
+     Get.to(() => const AddTaskPage());
+
+   }
+
+   void onTapped(){
      print("Tapped");
      Get.to(() => const AddTaskPage());
 
