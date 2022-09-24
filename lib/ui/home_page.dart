@@ -179,46 +179,65 @@ class _HomePageState extends State<HomePage> {
         color: Get.isDarkMode ? AppColors.darkGreyColor : Colors.white,
         child: Column(
           children: [
-            Container(
-              height: 6,
-              width: 120,
-              decoration:  BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Get.isDarkMode ? Colors.grey[400] : Colors.grey[200]
+            Padding(
+              padding: const EdgeInsets.only(bottom: 30),
+              child: Container(
+                height: 6,
+                width: 120,
+                decoration:  BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Get.isDarkMode ? Colors.grey[400] : Colors.grey[200]
+                ),
+
               ),
-
             ),
-            taskModel.isCompleted == 1
-                ? Container()
-                : _showBottomSheetButton('Task Completed', onTap : (){}),
+            taskModel.isCompleted == 1 ? Container() :
+                _showBottomSheetButton(label: 'Task Completed', onTap: (){
+                  Get.back();
+                }, clr: AppColors.primaryColor, context: context),
+                const SizedBox(height: 10,),
+                _showBottomSheetButton(label: 'Delete Task', onTap: (){
+                  _taskController.deleteTask(taskModel);
+                  _taskController.getTasks();
+                  Get.back();
+                }, clr: Colors.red[300]!, context: context),
+                const SizedBox(height: 10,),
+                _showBottomSheetButton(label: 'Close', onTap: (){
 
+                }, clr: Colors.white,isClose: true, context: context)
           ],
         ),
       )
     );
    }
-   _showBottomSheetButton({required String label , required Function onTapped , required Color clr , bool isClosed = false}){
+   _showBottomSheetButton({
+     required String label ,
+     required Function()? onTap ,
+     required Color clr ,
+     bool isClose = false,
+     required BuildContext context}){
        return Padding(
          padding: const EdgeInsets.only(left: 30,right: 30),
          child: GestureDetector(
-           onTap: onTapped(),
+           onTap: onTap,
            child: Container(
+             margin: const EdgeInsets.symmetric(vertical: 4),
+             width: MediaQuery.of(context).size.width * 0.9,
+             height: 55,
              decoration: BoxDecoration(
-               borderRadius: BorderRadius.circular(20)
+                 color: isClose == true ? Colors.white : clr,
+                 border: Border.all(
+                 color: isClose == true ? Get.isDarkMode ? Colors.grey[600]! : Colors.grey[500]! : clr
+               ),
+                 borderRadius: BorderRadius.circular(20)
              ),
-             child: Text(label,style: titleStyle,),
+             child: Center(child: Text(label,style: isClose == true ? Get.isDarkMode ? titleStyle.copyWith(color: Colors.white) : titleStyle : titleStyle.copyWith(color: Colors.white) )),
            ),
          ),
        );
    }
 
    void onTap(){
-     print("Tapped");
-     Get.to(() => const AddTaskPage());
-
-   }
-
-   void onTapped(){
      print("Tapped");
      Get.to(() => const AddTaskPage());
 
