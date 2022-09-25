@@ -41,11 +41,12 @@ class DbHelper {
     return await _db!.delete(_tableName,where: "id=?" , whereArgs: [taskModel.id]);
   }
 
-  // static Future update(TaskModel taskModel) async {
-  //   _db!.update('''
-  //    UPDATE tasks
-  //
-  //    ''');
-  // }
+  static Future<int> update(int id) async {
+    return await _db!.rawUpdate('''
+     UPDATE task
+     SET isCompleted = ?
+     WHERE id = ?
+     ''',[1,id]);
+  }
 }
 

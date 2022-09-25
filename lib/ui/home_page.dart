@@ -147,23 +147,47 @@ class _HomePageState extends State<HomePage> {
          return ListView.builder(
            itemCount: _taskController.taskList.length,
            itemBuilder: (context,index){
-             return AnimationConfiguration.staggeredList(
-                 position: index,
-                 child: SlideAnimation(
-                   child: FadeInAnimation(
-                     child: Wrap(
-                       children: [
-                          GestureDetector(
-                            onTap: (){
-                              _showBottomSheet(context,_taskController.taskList[index]);
-                            },
-                            child: TaskTile(_taskController.taskList[index]) ,
-                          )
-                       ],
+             TaskModel taskModel = _taskController.taskList[index];
+             if(taskModel.repeat == 'Daily'){
+               return AnimationConfiguration.staggeredList(
+                   position: index,
+                   child: SlideAnimation(
+                     child: FadeInAnimation(
+                       child: Wrap(
+                         children: [
+                           GestureDetector(
+                             onTap: (){
+                               _showBottomSheet(context,taskModel);
+                             },
+                             child: TaskTile(taskModel) ,
+                           )
+                         ],
+                       ),
                      ),
-                   ),
-                 )
-             );
+                   )
+               );
+             }
+             if(taskModel.date == DateFormat.yMd().format(_dateTime)){
+               return  AnimationConfiguration.staggeredList(
+                   position: index,
+                   child: SlideAnimation(
+                     child: FadeInAnimation(
+                       child: Wrap(
+                         children: [
+                           GestureDetector(
+                             onTap: (){
+                               _showBottomSheet(context,taskModel);
+                             },
+                             child: TaskTile(taskModel) ,
+                           )
+                         ],
+                       ),
+                     ),
+                   )
+               );
+             } else {
+               return Container();
+             }
            },
          );
        }),
@@ -192,8 +216,13 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             taskModel.isCompleted == 1 ? Container() :
-                _showBottomSheetButton(label: 'Task Completed', onTap: (){
-                  Get.back();
+                _showBottomSheetButton(label: 'Task Completed', onTap: () async {
+                  int isTaskCompleted = await _taskController.markTaskAsCompleted(taskModel.id!);
+                  if(isTaskCompleted == 1){
+                    _taskController.getTasks();
+                    Get.back();
+                  }
+
                 }, clr: AppColors.primaryColor, context: context),
                 const SizedBox(height: 10,),
                 _showBottomSheetButton(label: 'Delete Task', onTap: (){
@@ -238,7 +267,6 @@ class _HomePageState extends State<HomePage> {
    }
 
    void onTap(){
-     print("Tapped");
      Get.to(() => const AddTaskPage());
 
    }

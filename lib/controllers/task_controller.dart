@@ -23,4 +23,9 @@ class TaskController extends GetxController {
   Future<int> deleteTask(TaskModel taskModel) async {
      return await DbHelper.delete(taskModel);
   }
+
+  Future<int> markTaskAsCompleted(int id) async {
+    return await DbHelper.update(id);
+  }
+
 }
